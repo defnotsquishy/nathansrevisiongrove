@@ -1,0 +1,8 @@
+node_modules/
+dist-pages/
+work/
+pages/styles.css
+pages/**/index.html
+pages/index.html
+*.tsbuildinfo
+.env*
