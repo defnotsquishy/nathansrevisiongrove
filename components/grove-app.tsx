@@ -90,6 +90,10 @@ import {
   BreadcrumbSeparator,
 } from '@/components/ui/breadcrumb';
 import { pageInfo, pageHref, type View } from '@/lib/pages';
+import { CloudProvider, useCloud } from './cloud-provider';
+import { PrivacyPolicy, CookiePolicy, Credits } from './legal-pages';
+const AccountPanel = lazy(() => import('./account-panel'));
+const AdminPanel = lazy(() => import('./admin-panel'));
 import {
   readDevicePlan,
   writeDevicePlan,
@@ -112,6 +116,7 @@ import {
   overlaps,
   sessionFor,
   settingsSchema,
+  sessionSchema,
   streak,
   timeString,
   toMinutes,
@@ -132,6 +137,7 @@ const navigation = [
   { name: 'Maths lab', icon: FlaskConical },
   { name: 'Resources', icon: BookOpen },
   { name: 'Sources', icon: HelpCircle },
+  { name: 'Account', icon: CloudCheck },
 ] as const;
 const subscribeMotion = (callback: () => void) => {
   const media = matchMedia('(prefers-reduced-motion: reduce)');
@@ -231,6 +237,26 @@ export default function GroveApp({
   initialView = 'Today',
   pagesBase,
 }: { initialView?: View; pagesBase?: string } = {}) {
+  return (
+    <CloudProvider>
+      <AccountWorkspace initialView={initialView} pagesBase={pagesBase} />
+    </CloudProvider>
+  );
+}
+function AccountWorkspace(props: { initialView: View; pagesBase?: string }) {
+  const cloud = useCloud();
+  // Remount caches, dialogs and timers on identity changes so no user's data
+  // or in-flight mutation can become another user's plan.
+  const identity = cloud.user?.verified ? cloud.user.uid : 'guest';
+  return <SessionWorkspace key={identity} {...props} />;
+}
+function SessionWorkspace({
+  initialView,
+  pagesBase,
+}: {
+  initialView: View;
+  pagesBase?: string;
+}) {
   const [client] = useState(() => new QueryClient());
   return (
     <QueryClientProvider client={client}>
@@ -245,6 +271,8 @@ function App({
   initialView: View;
   pagesBase?: string;
 }) {
+  const cloud = useCloud();
+  const onlineAccount = Boolean(cloud.user?.verified);
   const cache = useQueryClient();
   const [view, setViewState] = useState<View>(initialView);
   const setView = (next: View) => {
@@ -285,6 +313,8 @@ function App({
   const query = useQuery<Saved>({
     queryKey: ['plan'],
     queryFn: async () => {
+      if (onlineAccount && cloud.runtime)
+        return cloud.runtime.readPlan(cloud.user!.uid);
       if (pagesBase) return readDevicePlan();
       const r = await fetch('/api/state');
       const body = (await r.json()) as Saved & { error?: string };
@@ -292,11 +322,18 @@ function App({
       return body;
     },
     retry: 1,
+    enabled: !cloud.loading && !cloud.error,
     refetchOnWindowFocus: false,
   });
   const mutation = useMutation({
     mutationFn: async (state: AppState) => {
       const current = cache.getQueryData<Saved>(['plan']);
+      if (onlineAccount && cloud.runtime)
+        return cloud.runtime.writePlan(
+          state,
+          current?.revision ?? 0,
+          cloud.user!.uid,
+        );
       if (pagesBase) return writeDevicePlan(state, current?.revision ?? 0);
       const r = await fetch('/api/state', {
         method: 'PUT',
@@ -312,7 +349,8 @@ function App({
   const state = query.data?.state ?? emptyState(today);
   const all = useMemo(() => topicList(state), [state]);
   const getTopic = (id: string) => all.find((t) => t.id === id) ?? topics[0];
-  const ready = !!query.data && !mutation.isPending;
+  const ready =
+    !!query.data && !mutation.isPending && !cloud.loading && !cloud.error;
   async function save(next: AppState, message = 'Saved to your grove') {
     try {
       await mutation.mutateAsync(next);
@@ -380,6 +418,14 @@ function App({
           </SidebarHeader>
           <SidebarContent>
             <NavItems view={view} setView={setView} pagesBase={pagesBase} />
+            {(cloud.role === 'admin' || cloud.role === 'owner') && (
+              <a
+                className="nav-item admin-nav"
+                href={pageHref('Admin', pagesBase || '/')}
+              >
+                Admin
+              </a>
+            )}
             <div className="side-note">
               <span className="eyebrow">YOUR NEXT MILESTONE</span>
               <span className="milestone-icon">
@@ -459,7 +505,11 @@ function App({
                   : query.isError || mutation.isError
                     ? 'Not synced'
                     : pagesBase
-                      ? 'Saved on this device'
+                      ? onlineAccount
+                        ? 'Saved to your account'
+                        : cloud.loading
+                          ? 'Checking account…'
+                          : 'Saved on this device'
                       : 'Saved online'}
               </span>
               <span className="streak-pill">
@@ -469,6 +519,19 @@ function App({
             </div>
           </header>
           <main className="main-content" id="main-content" tabIndex={-1}>
+            {cloud.error && (
+              <p className="error-banner" role="alert">
+                {cloud.error}{' '}
+                <a href={pageHref('Account', pagesBase || '/')}>Open Account</a>
+              </p>
+            )}
+            {cloud.user && !cloud.user.verified && (
+              <p className="account-notice">
+                Verify your email in{' '}
+                <a href={pageHref('Account', pagesBase || '/')}>Account</a> to
+                enable cloud saving. Current changes save on this device.
+              </p>
+            )}
             {(query.isError || mutation.isError) && (
               <div className="error-banner" role="alert">
                 <span>{(mutation.error ?? query.error)?.message}</span>
@@ -523,19 +586,31 @@ function App({
                           ? 'Every completed session gives your tree a little more life.'
                           : view === 'Maths lab'
                             ? 'Change a value. See what happens. Then try explaining why.'
-                            : view === 'Sources'
-                              ? 'The evidence and resource credits behind the tools.'
-                              : 'First Class Maths videos, questions and worked solutions.'}
+                            : [
+                                  'Account',
+                                  'Admin',
+                                  'Privacy',
+                                  'Cookies',
+                                  'Credits',
+                                ].includes(view)
+                              ? pageInfo[view].description
+                              : view === 'Sources'
+                                ? 'The evidence and resource credits behind the tools.'
+                                : 'First Class Maths videos, questions and worked solutions.'}
                 </p>
               </div>
-              <button
-                className="button primary"
-                disabled={!ready}
-                onClick={() => setPlanOpen(true)}
-              >
-                <CalendarDays size={17} />
-                {state.sessions.length ? 'Edit my plan' : 'Build my plan'}
-              </button>
+              {!['Account', 'Admin', 'Privacy', 'Cookies', 'Credits'].includes(
+                view,
+              ) && (
+                <button
+                  className="button primary"
+                  disabled={!ready}
+                  onClick={() => setPlanOpen(true)}
+                >
+                  <CalendarDays size={17} />
+                  {state.sessions.length ? 'Edit my plan' : 'Build my plan'}
+                </button>
+              )}
             </div>
             {view === 'Today' && (
               <>
@@ -932,6 +1007,24 @@ function App({
                 <Research />
               </section>
             )}
+            {view === 'Account' && (
+              <Suspense fallback={<output>Opening your account…</output>}>
+                <AccountPanel
+                  base={pagesBase || '/'}
+                  state={state}
+                  ready={ready}
+                  save={save}
+                />
+              </Suspense>
+            )}
+            {view === 'Admin' && (
+              <Suspense fallback={<output>Checking access…</output>}>
+                <AdminPanel base={pagesBase || '/'} />
+              </Suspense>
+            )}
+            {view === 'Privacy' && <PrivacyPolicy />}
+            {view === 'Cookies' && <CookiePolicy />}
+            {view === 'Credits' && <Credits />}
             {view === 'Resources' && (
               <Resources
                 board={state.settings.board}
@@ -968,6 +1061,30 @@ function App({
                 Calm motion
               </label>
             </footer>
+            <div className="legal-footer">
+              <p>© 2026 Nathan Yu · Nathan’s Revision Grove</p>
+              <p>
+                Maths resources by{' '}
+                <a
+                  href="https://www.1stclassmaths.com/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  First Class Maths
+                </a>
+                . An independent project; not affiliated or endorsed.
+              </p>
+              <nav aria-label="Site information">
+                <a href={pageHref('Credits', pagesBase || '/')}>
+                  Copyright & credits
+                </a>
+                <a href={pageHref('Privacy', pagesBase || '/')}>Privacy</a>
+                <a href={pageHref('Cookies', pagesBase || '/')}>
+                  Cookies & storage
+                </a>
+                <a href={pageHref('Account', pagesBase || '/')}>Account</a>
+              </nav>
+            </div>
           </main>
         </div>
         <Dialog open={backupOpen} onOpenChange={setBackupOpen}>
@@ -975,9 +1092,9 @@ function App({
             <DialogHeader>
               <DialogTitle>Your progress, safely backed up</DialogTitle>
               <DialogDescription>
-                This public version saves only on this device and browser.
-                Export a backup before clearing browser data or switching
-                devices. The original private site uses a separate saved plan.
+                {onlineAccount
+                  ? 'This backup contains the cloud plan for your signed-in account. Restoring will replace that account’s plan after confirmation.'
+                  : 'This backup contains your device-only plan. Export it before clearing browser data. Sign in to save progress across devices when accounts are available.'}
               </DialogDescription>
             </DialogHeader>
             <div className="form-stack">
@@ -1015,21 +1132,35 @@ function App({
                   <p className="form-hint">
                     This backup contains {backupPreview.sessions.length} planned
                     sessions and {backupPreview.logs.length} completed sessions
-                    for {backupPreview.settings.name}. Restoring replaces this
-                    device’s current plan. Download your current backup first if
-                    you want to keep it.
+                    for {backupPreview.settings.name}. Restoring replaces your
+                    {onlineAccount ? ' cloud' : ' device'} plan. Download your
+                    current backup first if you want to keep it.
                   </p>
                   <button
                     className="button secondary"
                     disabled={mutation.isPending}
-                    onClick={() => {
+                    onClick={async () => {
                       try {
-                        cache.setQueryData(
-                          ['plan'],
-                          restoreDevicePlan(backupPreview),
-                        );
+                        if (onlineAccount) {
+                          if (
+                            !(await save(
+                              backupPreview,
+                              'Cloud backup restored',
+                            ))
+                          )
+                            return;
+                        } else {
+                          cache.setQueryData(
+                            ['plan'],
+                            restoreDevicePlan(backupPreview),
+                          );
+                        }
                         mutation.reset();
-                        setToast('Backup restored on this device');
+                        setToast(
+                          onlineAccount
+                            ? 'Backup restored to your account'
+                            : 'Backup restored on this device',
+                        );
                         setBackupPreview(null);
                         setBackupOpen(false);
                       } catch (error) {
@@ -1500,6 +1631,7 @@ function PlanForm({
         </DialogDescription>
       </DialogHeader>
       <form
+        noValidate
         onSubmit={(e) => {
           e.preventDefault();
           const p = settingsSchema.safeParse(s);
@@ -1676,9 +1808,15 @@ function SessionForm({
         </DialogDescription>
       </DialogHeader>
       <form
+        noValidate
         className="form-stack"
         onSubmit={async (e) => {
           e.preventDefault();
+          const valid = sessionSchema.safeParse(s);
+          if (!valid.success) {
+            setError(valid.error.issues[0].message);
+            return;
+          }
           if (toMinutes(s.time) + s.minutes > 1440) {
             setError('Please finish before midnight.');
             return;
@@ -1928,6 +2066,7 @@ function TopicMap({
             </DialogDescription>
           </DialogHeader>
           <form
+            noValidate
             className="form-stack"
             onSubmit={async (e) => {
               e.preventDefault();
@@ -2196,6 +2335,7 @@ function FocusSession({
             <label className="reflection-label">
               One thing to remember <span>(optional)</span>
               <textarea
+                className="resize-none"
                 maxLength={2000}
                 value={note}
                 onChange={(e) => setNote(e.target.value)}

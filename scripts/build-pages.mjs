@@ -2,8 +2,10 @@ import { build } from 'vite';
 import { mkdir, readFile, writeFile, copyFile } from 'node:fs/promises';
 import { resolve, dirname, relative } from 'node:path';
 import { pathToFileURL } from 'node:url';
+import { validateCloud, securePages } from './secure-pages.mjs';
 
 const site = JSON.parse(await readFile('pages/site.json', 'utf8'));
+const cloud = await validateCloud();
 if (!/^\/[a-z0-9/-]*\/$|^\/$/.test(site.base))
   throw new Error('Site base must start and end with /.');
 const origin = new URL(site.origin).origin;
@@ -91,7 +93,7 @@ for (const [view, page] of Object.entries(pageInfo)) {
       name: page.title,
       item: url,
     });
-  const html = `<!doctype html><html lang="en-GB" class="dark"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${esc(title)}</title><meta name="description" content="${esc(page.description)}"><meta name="theme-color" content="#101411"><link rel="icon" href="${site.base}favicon.svg" type="image/svg+xml"><link rel="canonical" href="${url}"><meta property="og:title" content="${esc(title)}"><meta property="og:description" content="${esc(page.description)}"><meta property="og:url" content="${url}"><meta property="og:type" content="website"><script type="application/ld+json">${JSON.stringify({ '@context': 'https://schema.org', '@type': 'BreadcrumbList', itemListElement: crumbs })}</script></head><body><a href="#main-content" class="skip-link">Skip to content</a><div id="root" data-view="${esc(view)}" data-base="${site.base}">${await render(view, site.base)}</div><noscript><p>Enable JavaScript to edit your timetable and save progress. Revision resource links remain available.</p></noscript><script type="module" src="/client.tsx"></script></body></html>`;
+  const html = `<!doctype html><html lang="en-GB" class="dark"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${esc(title)}</title><meta name="description" content="${esc(page.description)}"><meta name="theme-color" content="#101411">${view === 'Admin' || view === 'Account' ? '<meta name="robots" content="noindex,nofollow">' : ''}<link rel="icon" href="${site.base}favicon.svg" type="image/svg+xml"><link rel="canonical" href="${url}"><meta property="og:title" content="${esc(title)}"><meta property="og:description" content="${esc(page.description)}"><meta property="og:url" content="${url}"><meta property="og:type" content="website"><script type="application/ld+json">${JSON.stringify({ '@context': 'https://schema.org', '@type': 'BreadcrumbList', itemListElement: crumbs })}</script></head><body><a href="#main-content" class="skip-link">Skip to content</a><div id="root" data-view="${esc(view)}" data-base="${site.base}">${await render(view, site.base)}</div><noscript><p>Enable JavaScript to edit your timetable and save progress. Revision resource links remain available.</p></noscript><script type="module" src="/client.tsx"></script></body></html>`;
   await mkdir(resolve('pages', page.path), { recursive: true });
   await writeFile(resolve('pages', page.path, 'index.html'), html);
 }
@@ -107,6 +109,7 @@ await writeFile(
   `<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">${Object.values(
     pageInfo,
   )
+    .filter((page) => !['account/', 'admin/'].includes(page.path))
     .map((page) => `<url><loc>${origin}${site.base}${page.path}</loc></url>`)
     .join('')}</urlset>`,
 );
@@ -119,3 +122,4 @@ await writeFile(
 console.log(
   `Built ${Object.keys(pageInfo).length} static pages, sitemap, robots, favicon and custom 404 in dist-pages.`,
 );
+await securePages(resolve('dist-pages'), cloud);

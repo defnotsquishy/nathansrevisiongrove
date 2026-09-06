@@ -1,0 +1,31 @@
+{
+  "profile": "product-admin",
+  "sourceRoots": [
+    "components",
+    "lib"
+  ],
+  "locale": "en-GB",
+  "canonicalMap": "UX-CONTRACT.md",
+  "requiredCapabilities": [
+    "Select/Listbox",
+    "Date",
+    "Form",
+    "Scrollbar",
+    "Toast",
+    "CRUD"
+  ],
+  "ownership": {
+    "Select/Listbox": "native",
+    "Date": "native"
+  },
+  "requiredCommands": [
+    "unit"
+  ],
+  "commands": {
+    "unit": "pnpm test"
+  },
+  "evidence": {
+    "crudFullFlow": "tests/firestore-rules.mjs",
+    "failurePaths": "tests/firestore-rules.mjs"
+  }
+}

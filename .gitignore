@@ -6,3 +6,8 @@ pages/**/index.html
 pages/index.html
 *.tsbuildinfo
 .env*
+
+*-debug.log
+.firebase/
+firestore-debug.log
+ui-debug.log

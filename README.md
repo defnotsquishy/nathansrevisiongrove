@@ -6,7 +6,11 @@ A GCSE revision timetable with 106 Higher Maths topics, First Class Maths links,
 
 ## Your progress
 
-Progress stays in this browser on this device. There are no accounts, analytics or shared progress records. Use **Back up or restore progress** to download a JSON backup before clearing browser data or switching devices. Restore previews the backup and requires confirmation before replacing the current plan. The original private Sites version has its own separate saved plan.
+Guest progress stays in this browser on this device. Use **Back up or restore progress** to download a JSON backup before clearing browser data or switching devices. Restore previews the backup and requires confirmation before replacing the current plan. The original private Sites version has its own separate saved plan.
+
+Optional Firebase accounts support verified email sign-in, password recovery, cloud progress, account deletion and limited admin roles. Accounts are disabled until the owner connects Firebase and provides a public privacy contact. Follow [the five-step setup guide](SETUP.md) using Firebase's free Spark plan. There are no ads, analytics or sales of user data. Read the website's Privacy, Cookies and Credits pages for details.
+
+Cloud plans belong to their signed-in user. Admins can view usernames and roles; only the owner can grant admin access. Admin roles do not grant access to other students' revision plans. Firestore rules enforce this independently of the browser. See [security boundaries and testing](SECURITY.md).
 
 ## Run and build
 
@@ -37,4 +41,3 @@ The maths lab and 3D models load on demand. React and Three.js use separate cach
 5. **How should animation stay comfortable?** Respect reduced-motion settings, add a clear motion switch, and preserve manual model controls. [W3C technique C39](https://www.w3.org/WAI/WCAG21/Techniques/css/C39).
 
 Sources checked 5 September 2026. Tree and solid models are generated interactively with Three.js; Blender was not used.
-

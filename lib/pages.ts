@@ -1,4 +1,34 @@
 export const pageInfo = {
+  Account: {
+    path: 'account/',
+    title: 'Your revision account',
+    description:
+      'Manage sign-in, cloud progress, backups and your account privacy.',
+  },
+  Admin: {
+    path: 'admin/',
+    title: 'Revision Grove administration',
+    description:
+      'Authorised account directory and administrator access controls.',
+  },
+  Privacy: {
+    path: 'privacy/',
+    title: 'Privacy policy',
+    description:
+      'What Revision Grove stores, why it is used and how to control or delete your data.',
+  },
+  Cookies: {
+    path: 'cookies/',
+    title: 'Cookies and browser storage',
+    description:
+      'How Revision Grove uses essential browser storage without advertising or analytics trackers.',
+  },
+  Credits: {
+    path: 'credits/',
+    title: 'Copyright and credits',
+    description:
+      'Website copyright, First Class Maths attribution and open-source credits.',
+  },
   Today: {
     path: '',
     title: 'Revision dashboard',
