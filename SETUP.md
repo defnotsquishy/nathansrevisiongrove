@@ -32,7 +32,7 @@ Sign out and back in on the website. **Admin** appears in the navigation. You ca
 
 Create a second test account, verify its email, save a timetable, sign out and sign in on another browser. Its progress should return. Confirm the second account cannot open the admin directory. Download a backup, check that it contains the expected plan, and try account deletion with a disposable test account. Do not change production rules just to get a test to pass.
 
-Cloud account deletion removes app records and the Firebase sign-in user. Operators who delete a user directly in Firebase Authentication must also delete plans/UID, profiles/UID and access/UID in Firestore; this app does not use a paid background function to do that automatically.
+Cloud account deletion removes the plan, username, role and Firebase sign-in user. It retains a minimal deletions/UID marker with the deletion time, preventing still-valid old sessions from recreating the records. Operators who delete a user directly in Firebase Authentication must also delete plans/UID, profiles/UID and access/UID in Firestore and retain the same deletion marker; this app does not use a paid background function to do that automatically.
 
 ## Free-plan limits
 

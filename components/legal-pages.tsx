@@ -129,7 +129,10 @@ export function PrivacyPolicy() {
       <p>
         Cloud progress is kept until you delete your account or ask the owner to
         remove it. Account provides a download and a permanent deletion control.
-        Deletion removes the app’s cloud records and sign-in account; providers
+        Deletion removes your revision plan, username, role and sign-in account.
+        A security marker containing only the retired account ID and deletion
+        time is retained to prevent old sessions from recreating deleted
+        records. It contains no email, username or revision content. Providers
         may retain limited security or backup records according to their own
         policies. If deletion fails, the page tells you and you can retry.
       </p>

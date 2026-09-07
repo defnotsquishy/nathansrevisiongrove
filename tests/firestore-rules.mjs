@@ -118,11 +118,54 @@ try {
   await assertFails(getDocs(query(collection(bob, 'profiles'), limit(25))));
   await assertFails(deleteDoc(doc(admin, 'profiles', 'alice')));
   const deletion = writeBatch(alice);
+  deletion.set(doc(alice, 'deletions', 'alice'), {
+    deletedAt: serverTimestamp(),
+  });
   deletion.delete(doc(alice, 'profiles', 'alice'));
   deletion.delete(doc(alice, 'plans', 'alice'));
   deletion.delete(doc(alice, 'access', 'alice'));
   await assertSucceeds(deletion.commit());
   assert.equal((await getDoc(doc(alice, 'profiles', 'alice'))).exists(), false);
+  // The original cached verified token must not resurrect an erased account.
+  await assertFails(
+    setDoc(doc(alice, 'profiles', 'alice'), {
+      username: 'Resurrected',
+      createdAt: serverTimestamp(),
+    }),
+  );
+  await assertFails(setDoc(doc(alice, 'plans', 'alice'), payload));
+  await assertFails(deleteDoc(doc(alice, 'deletions', 'alice')));
+  await assertFails(
+    updateDoc(doc(alice, 'deletions', 'alice'), {
+      deletedAt: serverTimestamp(),
+    }),
+  );
+  await assertFails(getDoc(doc(bob, 'deletions', 'alice')));
+  await assertFails(
+    setDoc(doc(owner, 'deletions', 'owner'), { deletedAt: serverTimestamp() }),
+  );
+  const recreate = writeBatch(bob);
+  recreate.set(doc(bob, 'deletions', 'bob'), { deletedAt: serverTimestamp() });
+  recreate.set(doc(bob, 'profiles', 'bob'), {
+    username: 'Still here',
+    createdAt: serverTimestamp(),
+  });
+  await assertFails(recreate.commit());
+  // Use a fresh UID too: failure must not rely on the profile-update prohibition.
+  const fresh = db('atomic-recreation');
+  const atomic = writeBatch(fresh);
+  atomic.set(doc(fresh, 'deletions', 'atomic-recreation'), {
+    deletedAt: serverTimestamp(),
+  });
+  atomic.set(doc(fresh, 'profiles', 'atomic-recreation'), {
+    username: 'New profile',
+    createdAt: serverTimestamp(),
+  });
+  await assertFails(atomic.commit());
+  // Cleanup retries remain allowed, but the marker itself stays immutable.
+  await assertSucceeds(deleteDoc(doc(alice, 'profiles', 'alice')));
+  await assertSucceeds(deleteDoc(doc(alice, 'plans', 'alice')));
+  await assertSucceeds(getDoc(doc(alice, 'deletions', 'alice')));
   await assertFails(
     setDoc(doc(alice, 'arbitrary', 'document'), { public: true }),
   );

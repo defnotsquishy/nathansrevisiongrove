@@ -24,6 +24,8 @@ Forms use noValidate and text errors, preserve values on network failure and dis
 
 Account status starts loading, then guest/unverified/verified or an inline service error. Sign-out clears the account context; it does not erase separate guest data. An unavailable account service does not claim a successful cloud save. Admin lists fetch 25 at a time. No speculative search or bulk actions.
 
+Account cleanup uses a Firestore transaction to retire the UID with an immutable deletion-time marker and remove profile, plan and role. Rules check the post-transaction marker to prevent recreation through old tokens or simultaneous writes. The privacy notice discloses this minimal retained security record. Retry can read the marker and repeat cleanup without changing it.
+
 ## Privacy and deployment
 Account activation requires valid public Firebase configuration and a public privacy contact. Missing setup leaves guest mode enabled and the account page honestly unavailable. The privacy notice describes the current activation state. Browser storage serves requested features; there is no optional tracking consent switch because no optional tracking exists.
 

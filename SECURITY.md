@@ -9,6 +9,7 @@ This is a static GitHub Pages application with optional Firebase Authentication 
 - Owner creation and transfer require privileged Firebase console access. Protect that access with two-factor authentication. Console operators and their server credentials can bypass Firestore rules; never publish those credentials.
 - Cloud writes validate the local state and use transactions to reject stale revisions. Rules independently restrict document fields, sizes and revision increments. Plan contents are private, user-controlled JSON, not trusted server instructions or executable markup.
 - Deletion reauthenticates before deleting data. Database cleanup and Auth deletion are separate operations; retry after a partial failure. Deleting Auth users manually in the Firebase console does not automatically delete their Firestore documents.
+- Cleanup atomically writes an immutable `deletions/UID` marker containing only the deletion timestamp. Rules check post-transaction state to stop cached tokens, refresh callbacks and other tabs from recreating profiles or plans. No username, email or revision content is kept in this marker. It remains for this security purpose; do not remove it while old tokens might still be usable. Concurrent cleanup retries use a transaction.
 - Firebase Auth stores passwords. App code never stores them in a plan, profile, log or backup. Remember me is optional; the default authentication session lasts in the current browser session. Separate guest progress survives sign-out.
 
 ## Browser and hosting

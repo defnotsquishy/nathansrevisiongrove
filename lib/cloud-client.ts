@@ -30,7 +30,6 @@ import {
   startAfter,
   getDocs,
   setDoc,
-  writeBatch,
   type QueryDocumentSnapshot,
   connectFirestoreEmulator,
 } from 'firebase/firestore/lite';
@@ -222,16 +221,21 @@ export const runtime = {
       u,
       EmailAuthProvider.credential(u.email, password),
     );
-    const access = await getDoc(doc(db, 'access', u.uid));
-    if (access.exists() && access.data().role === 'owner')
-      throw new Error(
-        'Transfer the owner role in the Firebase console before deleting this account.',
-      );
-    const batch = writeBatch(db);
-    batch.delete(doc(db, 'plans', u.uid));
-    batch.delete(doc(db, 'profiles', u.uid));
-    batch.delete(doc(db, 'access', u.uid));
-    await batch.commit();
+    await runTransaction(db, async (tx) => {
+      const accessRef = doc(db, 'access', u.uid);
+      const markerRef = doc(db, 'deletions', u.uid);
+      const access = await tx.get(accessRef);
+      const marker = await tx.get(markerRef);
+      if (access.exists() && access.data().role === 'owner')
+        throw new Error(
+          'Transfer the owner role in the Firebase console before deleting this account.',
+        );
+      // A server-enforced marker also blocks token refreshes in other browser tabs.
+      if (!marker.exists()) tx.set(markerRef, { deletedAt: serverTimestamp() });
+      tx.delete(doc(db, 'plans', u.uid));
+      tx.delete(doc(db, 'profiles', u.uid));
+      tx.delete(accessRef);
+    });
     // If Auth deletion fails after data deletion, the user can retry this idempotent cleanup.
     await deleteUser(u);
   },

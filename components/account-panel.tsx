@@ -249,7 +249,9 @@ export default function AccountPanel({
           <h3>Delete my account</h3>
           <p>
             Deletes your cloud plan, username and sign-in account. Download your
-            cloud progress first. Device-only backups are separate.
+            cloud progress first. Device-only backups are separate. A minimal
+            account-ID and deletion-time marker remains to block old sessions
+            from restoring deleted records.
           </p>
           <button
             className="button secondary danger-button"

@@ -6,7 +6,8 @@ service cloud.firestore {
     function self(uid) { return signed() && request.auth.uid == uid; }
     function profile(uid) { return /databases/$(database)/documents/profiles/$(uid); }
     function access(uid) { return /databases/$(database)/documents/access/$(uid); }
-    function active() { return verified() && exists(profile(request.auth.uid)); }
+    function deletion(uid) { return /databases/$(database)/documents/deletions/$(uid); }
+    function active() { return verified() && !exists(deletion(request.auth.uid)) && exists(profile(request.auth.uid)); }
     function role(uid) { return exists(access(uid)) ? get(access(uid)).data.role : 'member'; }
     function admin() { return active() && role(request.auth.uid) in ['admin', 'owner']; }
     function owner() { return active() && role(request.auth.uid) == 'owner'; }
@@ -15,7 +16,7 @@ service cloud.firestore {
     match /profiles/{uid} {
       allow get: if self(uid) || admin();
       allow list: if admin() && request.query.limit != null && request.query.limit <= 25;
-      allow create: if self(uid) && verified()
+      allow create: if self(uid) && verified() && !existsAfter(deletion(uid))
         && request.resource.data.keys().hasOnly(['username','createdAt'])
         && request.resource.data.username is string
         && request.resource.data.username.size() >= 2 && request.resource.data.username.size() <= 30
@@ -28,15 +29,15 @@ service cloud.firestore {
       allow list: if false;
       // Only a console operator can bootstrap or transfer the owner role.
       allow create, update: if owner() && request.auth.uid != uid && notOwner(uid)
-        && exists(profile(uid)) && request.resource.data.keys().hasOnly(['role'])
+        && !existsAfter(deletion(uid)) && exists(profile(uid)) && request.resource.data.keys().hasOnly(['role'])
         && request.resource.data.role in ['member','admin'];
       allow delete: if self(uid) && notOwner(uid);
     }
     match /plans/{uid} {
       // Admins cannot read other students' revision plans or reflection notes.
-      allow get: if self(uid) && verified();
+      allow get: if self(uid) && verified() && !exists(deletion(uid));
       allow list: if false;
-      allow create, update: if self(uid) && active()
+      allow create, update: if self(uid) && active() && !existsAfter(deletion(uid))
         && request.resource.data.keys().hasOnly(['payload','revision','updatedAt'])
         && request.resource.data.payload is string && request.resource.data.payload.size() <= 700000
         && request.resource.data.revision is int && request.resource.data.revision > 0
@@ -44,6 +45,16 @@ service cloud.firestore {
         && ((!exists(/databases/$(database)/documents/plans/$(uid)) && request.resource.data.revision == 1)
           || (exists(/databases/$(database)/documents/plans/$(uid)) && request.resource.data.revision == resource.data.revision + 1));
       allow delete: if self(uid) && notOwner(uid);
+    }
+    match /deletions/{uid} {
+      // Retire this UID atomically. Old tokens and other tabs cannot recreate data.
+      allow get: if self(uid);
+      allow create: if self(uid) && notOwner(uid)
+        && request.resource.data.keys().hasOnly(['deletedAt'])
+        && request.resource.data.deletedAt == request.time
+        && !existsAfter(profile(uid)) && !existsAfter(access(uid))
+        && !existsAfter(/databases/$(database)/documents/plans/$(uid));
+      allow list, update, delete: if false;
     }
     match /{document=**} { allow read, write: if false; }
   }
