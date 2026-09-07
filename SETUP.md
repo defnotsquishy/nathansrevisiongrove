@@ -1,24 +1,22 @@
-# Turn on free accounts and cloud progress
+# Manage free accounts and cloud progress
 
-The updated website works in guest mode now. Cloud accounts remain switched off until the steps below are complete. Use Firebase's **Spark (no-cost)** plan. Do not enable Analytics, upgrade to Blaze or add a payment method for this app.
+Cloud accounts are connected to the existing **nathans-revision-grove** Firebase project on the **Spark (no-cost)** plan. Email/password Authentication, Firestore rules and the public web configuration are deployed. The database is the default Standard edition database in London (`europe-west2`) with deletion protection. Analytics is not used. Keep the project on Spark unless the owner deliberately chooses a paid plan.
 
-## 1. Create the project
+## 1. Project — complete
 
-Open [Firebase Console](https://console.firebase.google.com/) and choose **Create a project**. Use a name such as Nathan's Revision Grove. Turn Google Analytics off. The app needs only Authentication and Cloud Firestore.
+The project is already created. Its ID is **nathans-revision-grove**. The app needs only Authentication and Cloud Firestore.
 
-## 2. Turn on email accounts
+## 2. Email accounts — complete
 
-In **Build → Authentication → Get started → Sign-in method**, enable **Email/Password**. In Authentication settings add **defnotsquishy.github.io** to **Authorized domains**. Set the password policy to a minimum of **12 characters**, enable email-enumeration protection if available, and keep Google's abuse/rate protections enabled. Do not disable email verification: the app and database require it for cloud saving. Keep the default Firebase email action handler; custom SMTP is not needed.
+Email/password is enabled, **defnotsquishy.github.io** is authorized, the minimum password length is 12 characters and improved email privacy is enabled. Do not disable email verification: the app and database require it for cloud saving. Keep the default Firebase email action handler; custom SMTP is not needed.
 
-## 3. Create the database and paste the rules
+## 3. Database and rules — complete
 
-In **Build → Firestore Database**, create the **default Standard edition** database in **production mode**. Pick a suitable UK/European location before creation; this choice is not easily changed. Open its **Rules** tab, replace the starter rules with the complete [firestore.rules](firestore.rules) file from this repository and click **Publish**. Never select public/test rules for the live database.
+The **default Standard edition** database is deployed in London (`europe-west2`). The complete [firestore.rules](firestore.rules) file and [firestore.indexes.json](firestore.indexes.json) are deployed. Never replace them with public/test rules on the live database.
 
-## 4. Copy the public web configuration
+## 4. Web configuration — complete
 
-In **Project settings → General → Your apps**, add a **Web app** (`</>`). Firebase Hosting is not required because the site uses GitHub Pages. Copy the firebaseConfig object. These four values are needed: apiKey, authDomain, projectId and appId. Do not copy a service-account JSON file, private key or admin credential.
-
-Send that public configuration and your chosen public privacy email to Codex, and it can finish the connection. Alternatively edit [pages/cloud.json](pages/cloud.json) in GitHub: paste those four values under firebase, fill privacyEmail, then set enabled to true. Commit the change. The existing GitHub workflow rebuilds and publishes automatically. Extra Analytics configuration is not needed.
+The registered Firebase web app is connected in [pages/cloud.json](pages/cloud.json), and `cheesehim21@gmail.com` is the published privacy contact. Firebase Hosting is not required because the site uses GitHub Pages. This file contains only Firebase's public web configuration; never add a service-account JSON file, private key or administrator credential.
 
 Before making accounts available to classmates, check the privacy notice with the responsible school/adult contact and make sure the published contact works. Restrict the Firebase web API key to the APIs Firebase needs; keep authorized domains narrow. Protect your Firebase/Google and GitHub administrator accounts with two-factor authentication. See [Firebase's API key guidance](https://firebase.google.com/docs/projects/api-keys).
 

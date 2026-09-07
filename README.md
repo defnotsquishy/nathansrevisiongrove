@@ -8,7 +8,7 @@ A GCSE revision timetable with 106 Higher Maths topics, First Class Maths links,
 
 Guest progress stays in this browser on this device. Use **Back up or restore progress** to download a JSON backup before clearing browser data or switching devices. Restore previews the backup and requires confirmation before replacing the current plan. The original private Sites version has its own separate saved plan.
 
-Optional Firebase accounts support verified email sign-in, password recovery, cloud progress, account deletion and limited admin roles. Accounts are disabled until the owner connects Firebase and provides a public privacy contact. Follow [the five-step setup guide](SETUP.md) using Firebase's free Spark plan. There are no ads, analytics or sales of user data. Read the website's Privacy, Cookies and Credits pages for details.
+Firebase accounts are enabled and support verified email sign-in, password recovery, cloud progress, account deletion and limited admin roles. The backend uses the `nathans-revision-grove` Firebase project on the free Spark plan, with Firestore Standard in London. There are no ads, analytics or sales of user data. Read the website's Privacy, Cookies and Credits pages for details, or use `cheesehim21@gmail.com` for privacy and account questions.
 
 Cloud plans belong to their signed-in user. Admins can view usernames and roles; only the owner can grant admin access. Admin roles do not grant access to other students' revision plans. Firestore rules enforce this independently of the browser. See [security boundaries and testing](SECURITY.md).
 

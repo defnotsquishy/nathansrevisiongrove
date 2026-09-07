@@ -1,5 +1,10 @@
 {
-  "enabled": false,
-  "firebase": { "apiKey": "", "authDomain": "", "projectId": "", "appId": "" },
-  "privacyEmail": ""
+  "enabled": true,
+  "firebase": {
+    "apiKey": "AIzaSyDjPM7JE0fSJ8KBXReDPJpsqrhl_xvPaBU",
+    "authDomain": "nathans-revision-grove.firebaseapp.com",
+    "projectId": "nathans-revision-grove",
+    "appId": "1:804518122010:web:35566dc451a3fe96fef7a3"
+  },
+  "privacyEmail": "cheesehim21@gmail.com"
 }
