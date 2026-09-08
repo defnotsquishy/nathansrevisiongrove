@@ -254,6 +254,26 @@ export function finishSession(
     },
   };
 }
+export function rateTopic(
+  state: AppState,
+  topicId: string,
+  confidence: number,
+  today = localDate(),
+): AppState {
+  if (!topicList(state).some((topic) => topic.id === topicId)) return state;
+  const safeConfidence = Math.max(1, Math.min(3, Math.round(confidence)));
+  return {
+    ...state,
+    progress: {
+      ...state.progress,
+      [topicId]: {
+        confidence: safeConfidence,
+        last: today,
+        next: addDays(today, safeConfidence === 1 ? 1 : safeConfidence === 2 ? 3 : 7),
+      },
+    },
+  };
+}
 export function streak(s: AppState, today = localDate()) {
   const dates = new Set(s.logs.map((l) => l.date));
   let day = dates.has(today) ? today : addDays(today, -1);

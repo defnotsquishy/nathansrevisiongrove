@@ -45,6 +45,10 @@ assert.equal(
     .length,
   1,
 );
+const rated = m.rateTopic(initial, 'math-1', 1, today);
+assert.equal(rated.progress['math-1'].confidence, 1);
+assert.equal(rated.progress['math-1'].next, '2026-09-06');
+assert.equal(m.rateTopic(initial, 'missing-topic', 3, today), initial);
 const file = new File(
   [JSON.stringify({ format: 'revision-grove', version: 1, state: done })],
   'backup.json',

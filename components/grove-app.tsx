@@ -50,6 +50,7 @@ import {
   Pencil,
   Trash2,
   CloudCheck,
+  NotebookPen,
 } from 'lucide-react';
 import {
   Sidebar,
@@ -103,6 +104,7 @@ import {
 } from '@/lib/device-storage';
 const GroveScene = lazy(() => import('./grove-scene'));
 const MathsLab = lazy(() => import('./maths-lab'));
+const PracticeHub = lazy(() => import('./practice-hub'));
 import {
   addDays,
   categories,
@@ -114,6 +116,7 @@ import {
   makePlan,
   monday,
   overlaps,
+  rateTopic,
   sessionFor,
   settingsSchema,
   sessionSchema,
@@ -133,6 +136,7 @@ const navigation = [
   { name: 'Today', icon: LayoutDashboard },
   { name: 'Timetable', icon: CalendarDays },
   { name: 'Topic map', icon: Map },
+  { name: 'Practice', icon: NotebookPen },
   { name: 'My grove', icon: TreePine },
   { name: 'Maths lab', icon: FlaskConical },
   { name: 'Resources', icon: BookOpen },
@@ -414,7 +418,7 @@ function App({
                 </span>
               </span>
             </button>
-            <div className="owner-label">NATHAN’S STUDY SPACE</div>
+            <div className="owner-label">GCSE REVISION WORKSPACE</div>
           </SidebarHeader>
           <SidebarContent>
             <NavItems view={view} setView={setView} pagesBase={pagesBase} />
@@ -586,6 +590,8 @@ function App({
                           ? 'Every completed session gives your tree a little more life.'
                           : view === 'Maths lab'
                             ? 'Change a value. See what happens. Then try explaining why.'
+                            : view === 'Practice'
+                              ? pageInfo.Practice.description
                             : [
                                   'Account',
                                   'Admin',
@@ -599,9 +605,14 @@ function App({
                                 : 'First Class Maths videos, questions and worked solutions.'}
                 </p>
               </div>
-              {!['Account', 'Admin', 'Privacy', 'Cookies', 'Credits'].includes(
-                view,
-              ) && (
+              {![
+                'Account',
+                'Admin',
+                'Privacy',
+                'Cookies',
+                'Credits',
+                'Practice',
+              ].includes(view) && (
                 <button
                   className="button primary"
                   disabled={!ready}
@@ -837,9 +848,9 @@ function App({
                     </p>
                     <button
                       className="text-button"
-                      onClick={() => setView('Resources')}
+                      onClick={() => setView('Practice')}
                     >
-                      Explore resources <ArrowRight size={16} />
+                      Open practice desk <ArrowRight size={16} />
                     </button>
                   </div>
                 </section>
@@ -860,8 +871,25 @@ function App({
                 ready={ready}
                 onStart={(t) => start(sessionFor(t.id, state.settings.minutes))}
                 onSave={save}
+                onRate={(topic, confidence) =>
+                  save(
+                    rateTopic(state, topic.id, confidence, today),
+                    `${['Red', 'Amber', 'Green'][confidence - 1]} saved for ${topic.title}.`,
+                  )
+                }
                 today={today}
               />
+            )}
+            {view === 'Practice' && (
+              <Suspense fallback={<output>Opening your practice desk…</output>}>
+                <PracticeHub
+                  state={state}
+                  ready={ready}
+                  today={today}
+                  board={state.settings.board}
+                  onSave={save}
+                />
+              </Suspense>
             )}
             {view === 'My grove' && (
               <>
@@ -1043,7 +1071,7 @@ function App({
               )}
               <span>
                 <Sprout size={14} />
-                Made for the days you show up.
+                Progress saves as you work.
               </span>
               <label>
                 <Switch
@@ -1903,12 +1931,14 @@ function TopicMap({
   ready,
   onStart,
   onSave,
+  onRate,
   today,
 }: {
   state: AppState;
   ready: boolean;
   onStart: (t: Topic) => void;
   onSave: (s: AppState, m: string) => Promise<boolean>;
+  onRate: (topic: Topic, confidence: number) => Promise<boolean>;
   today: string;
 }) {
   const [search, setSearch] = useState('');
@@ -1968,6 +1998,16 @@ function TopicMap({
             placeholder="Find a topic…"
             aria-label="Search topics"
           />
+          {search && (
+            <button
+              type="button"
+              className="search-clear"
+              aria-label="Clear topic search"
+              onClick={() => setSearch('')}
+            >
+              <X size={15} />
+            </button>
+          )}
         </label>
         <Picker
           label="Topic category"
@@ -1997,7 +2037,7 @@ function TopicMap({
       </div>
       <div className="topic-results">
         <span>{result.length} topics</span>
-        <span>Confidence comes from your session check-ins.</span>
+        <span>Set RAG here or after a practice question.</span>
       </div>
       <div className="topic-list">
         {result.map((t) => {
@@ -2013,13 +2053,25 @@ function TopicMap({
                 <span>{t.category}</span>
                 <strong>{t.title}</strong>
               </div>
-              <span className={`confidence confidence-${p?.confidence ?? 0}`}>
-                {p
-                  ? ['Needs practice', 'Getting there', 'Confident'][
-                      p.confidence - 1
-                    ]
-                  : 'Not started'}
-              </span>
+              <fieldset className="rag-compact">
+                <legend className="sr-only">Rate confidence for {t.title}</legend>
+                {[
+                  ['R', 1, 'Red'],
+                  ['A', 2, 'Amber'],
+                  ['G', 3, 'Green'],
+                ].map(([short, value, label]) => (
+                  <button
+                    key={label}
+                    className={`rag-mini rag-${String(label).toLowerCase()}`}
+                    aria-label={`${label}: ${t.title}`}
+                    aria-pressed={p?.confidence === value}
+                    disabled={!ready}
+                    onClick={() => void onRate(t, Number(value))}
+                  >
+                    {short}
+                  </button>
+                ))}
+              </fieldset>
               <span className="review-date">
                 {p
                   ? p.next <= today

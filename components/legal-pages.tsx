@@ -26,7 +26,15 @@ export function Credits() {
         Thank you to First Class Maths for making these revision resources
         available. Revision Grove links to the originals; it does not claim
         ownership of or rehost their videos and worksheets. Credit is not
-        permission to copy their materials.
+        permission to copy their materials. Read the{' '}
+        <a
+          href="https://www.1stclassmaths.com/copyrightnotice"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          First Class Maths copyright notice
+        </a>
+        .
       </p>
       <p>
         This is an independent student project. It is not affiliated with,
@@ -51,12 +59,14 @@ export function Credits() {
 export function PrivacyPolicy() {
   return (
     <article className="panel policy-page">
-      <p className="eyebrow">Last updated 6 September 2026</p>
+      <p className="eyebrow">Last updated 8 September 2026</p>
       <h2>Your revision is yours</h2>
       <p>
-        Nathan’s Revision Grove is operated by Nathan Yu. We do not sell your
-        data, use it for advertising or add analytics trackers. You can use the
-        timetable without creating an account.
+        Nathan’s Revision Grove is operated by Nathan Yu. We do not collect
+        advertising or analytics data, and we do not sell personal data. You
+        can use the timetable without creating an account. If you choose an
+        account, the app stores only the account and revision information needed
+        to provide sign-in and cloud progress.
       </p>
       <p className="account-notice">
         {cloudConfigured
@@ -182,7 +192,7 @@ export function PrivacyPolicy() {
 export function CookiePolicy() {
   return (
     <article className="panel policy-page">
-      <p className="eyebrow">Last updated 6 September 2026</p>
+      <p className="eyebrow">Last updated 8 September 2026</p>
       <h2>No advertising or analytics cookies</h2>
       <p>
         Revision Grove uses browser storage to provide features you choose, such

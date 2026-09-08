@@ -47,6 +47,12 @@ export const pageInfo = {
     description:
       'Explore 106 GCSE Higher Maths topics, confidence check-ins and First Class Maths video links.',
   },
+  Practice: {
+    path: 'practice/',
+    title: 'GCSE maths practice desk',
+    description:
+      'Try original quick questions, open official First Class Maths booklets and save red, amber or green topic ratings.',
+  },
   'My grove': {
     path: 'grove/',
     title: 'Your progress grove',

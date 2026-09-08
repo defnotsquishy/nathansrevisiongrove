@@ -11,11 +11,14 @@ Business evidence: the owner requested GitHub Pages hosting, free account-based 
 | Scrollbar | app/globals.css | DESIGN.md | document; bounded tables | narrow viewport checks |
 | Toast | GroveApp status output | confirmed save result | local save, cloud save | persistence tests |
 | CRUD | lib/cloud-client.ts + firestore.rules | authenticated UID, current role and revision | own plan; owner role changes | rules emulator + browser tests |
+| Practice/RAG | components/practice-hub.tsx + lib/model.ts | saved topic progress | quick question; topic-row rating | unit + browser checks |
 
 ## Account and data boundaries
 Authentication is Firebase Auth, email/password with email verification required before cloud writes. Nicknames are not unique login identifiers. Email and passwords never enter Firestore. Passwords go only to the Firebase Authentication SDK. Session persistence is the default; Remember me opts into local auth persistence. No Firestore offline disk cache is enabled.
 
 Guest data uses the existing device key. Cloud data is separate; uploading the guest plan is explicit and confirms replacement. Every plan request carries the expected authenticated UID; account changes remount application state and query caches. Failed cloud operations never fall back to writing another storage location. Newer revisions reject stale saves. Edits remain in open forms so retry is possible; export preserves the last saved plan; unsaved form edits must be copied before reloading. A role grant cannot provide access to another student's plan.
+
+Practice questions authored in this repository may be shown on-page. Third-party questions and booklets remain on their provider's website and are linked with attribution. A RAG rating updates confidence and the next suggested review date; it does not create a session log, minutes or XP. Red schedules one day, amber three days and green seven days using the same heuristic as a completed session.
 
 Member: own profile/plan only. Admin: username directory, no other students' plans/emails. Owner: directory plus grant/revoke admin to other existing accounts. Owner creation and transfer require Firebase console access. No first-user-is-admin bootstrap and no client-writable owner role. The static admin document is public shell only; database access is independently denied for unauthorized requests.
 

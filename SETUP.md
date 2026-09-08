@@ -16,7 +16,7 @@ The **default Standard edition** database is deployed in London (`europe-west2`)
 
 ## 4. Web configuration — complete
 
-The registered Firebase web app is connected in [pages/cloud.json](pages/cloud.json), and `cheesehim21@gmail.com` is the published privacy contact. Firebase Hosting is not required because the site uses GitHub Pages. This file contains only Firebase's public web configuration; never add a service-account JSON file, private key or administrator credential.
+The registered Firebase web app is connected in [pages/cloud.json](pages/cloud.json), and `nathan.yu2010@outlook.com` is the published privacy contact. Firebase Hosting is not required because the site uses GitHub Pages. This file contains only Firebase's public web configuration; never add a service-account JSON file, private key or administrator credential.
 
 Before making accounts available to classmates, check the privacy notice with the responsible school/adult contact and make sure the published contact works. Restrict the Firebase web API key to the APIs Firebase needs; keep authorized domains narrow. Protect your Firebase/Google and GitHub administrator accounts with two-factor authentication. See [Firebase's API key guidance](https://firebase.google.com/docs/projects/api-keys).
 

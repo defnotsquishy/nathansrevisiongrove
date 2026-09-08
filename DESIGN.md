@@ -10,7 +10,7 @@ colors:
   danger: "#ffac9d"
 typography:
   sans:
-    fontFamily: "Arial, sans-serif"
+    fontFamily: "ui-sans-serif, system-ui, Segoe UI, sans-serif"
   mono:
     fontFamily: "monospace"
 rounded:
@@ -32,10 +32,12 @@ The accepted identity is a dark garden with lime foliage, a growing Three.js tre
 The existing app/globals.css :root variables are canonical runtime tokens. This document mirrors them: primary → --primary; background → --background; foreground → --foreground; card → --card; danger → --destructive. pages/styles.css is generated from that stylesheet and is never independently edited. Shared UI components consume the same Tailwind-mapped CSS variables.
 
 ## Typography
-The static build uses Arial for display and body text, differentiated by size and weight, with monospace for maths and numerical information. This preserves the approved design without remote font requests. New prose uses 15px and 1.75 line height; headings 24px. Account forms use sentence case and explicit action verbs.
+The static build uses the operating system UI font for display and body text, differentiated by size and weight, with monospace for maths and numerical information. This keeps the workspace crisp without remote font requests. New prose uses at least 14px with comfortable line height; headings use a tighter, practical hierarchy. Account forms and practice actions use sentence case and explicit verbs.
 
 ## Layout
 224px desktop sidebar; document scrolling; mobile drawer below 768px. Account and legal content has a 900px maximum width. Use natural page height and bounded horizontal overflow only inside data tables. Keep model/grid children min-width:0. Buttons wrap rather than overflow.
+
+The Practice route uses a visible four-step task path, a large question surface and a narrower progress/resource rail. At tablet widths the rail moves below the question; on phones every control becomes a single-column target.
 
 ## Elevation & Depth
 Panel backgrounds and subtle borders separate content. Base UI portals own modal depth and focus management. No new floating modal implementation.
@@ -45,6 +47,8 @@ The existing --radius of 0.8rem remains the control reference. Existing panels a
 
 ## Components
 Input, Dialog, Select, Switch, Sidebar and Breadcrumb are canonical owners under components/ui. AccountField variants compose Input and a labelled password-visibility button. Dialog's initialFocus targets Cancel for destructive and role changes. Successful mutations wait for remote acknowledgement. Errors remain inline and entered values survive retry. Account cloud status comes only from authenticated state and confirmed database reads/writes.
+
+RAG controls use text labels as well as colour. Red means relearn, amber means practise again and green means independent confidence. A rating updates the next review date but does not invent a completed session or add tree XP. First Class Maths booklets always open from their official URLs; the site does not embed or reproduce them.
 
 ## Motion
 Respect prefers-reduced-motion and the existing Calm motion control. Account and privacy pages need no decorative animation. Retain manual tree rotation when calm mode is active.

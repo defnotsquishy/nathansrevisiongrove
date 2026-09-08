@@ -2,13 +2,13 @@
 
 [Open the app](https://defnotsquishy.github.io/nathansrevisiongrove/)
 
-A GCSE revision timetable with 106 Higher Maths topics, First Class Maths links, a focus timer, confidence check-ins, custom subjects, a growing 3D tree and an interactive maths lab.
+A GCSE revision timetable with 106 Higher Maths topics, an original quick-question practice desk, First Class Maths booklet links, saved RAG confidence checks, a focus timer, custom subjects, a growing 3D tree and an interactive maths lab.
 
 ## Your progress
 
 Guest progress stays in this browser on this device. Use **Back up or restore progress** to download a JSON backup before clearing browser data or switching devices. Restore previews the backup and requires confirmation before replacing the current plan. The original private Sites version has its own separate saved plan.
 
-Firebase accounts are enabled and support verified email sign-in, password recovery, cloud progress, account deletion and limited admin roles. The backend uses the `nathans-revision-grove` Firebase project on the free Spark plan, with Firestore Standard in London. There are no ads, analytics or sales of user data. Read the website's Privacy, Cookies and Credits pages for details, or use `cheesehim21@gmail.com` for privacy and account questions.
+Firebase accounts are enabled and support verified email sign-in, password recovery, cloud progress, account deletion and limited admin roles. The backend uses the `nathans-revision-grove` Firebase project on the free Spark plan, with Firestore Standard in London. There are no ads, analytics or sales of user data. Read the website's Privacy, Cookies and Credits pages for details, or use `nathan.yu2010@outlook.com` for privacy and account questions.
 
 Cloud plans belong to their signed-in user. Admins can view usernames and roles; only the owner can grant admin access. Admin roles do not grant access to other students' revision plans. Firestore rules enforce this independently of the browser. See [security boundaries and testing](SECURITY.md).
 
