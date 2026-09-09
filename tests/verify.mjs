@@ -85,6 +85,8 @@ for (const page of Object.values(m.pageInfo)) {
   assert.ok(html.includes('name="description"'));
   assert.ok(html.includes('rel="canonical"'));
   assert.ok(html.includes('BreadcrumbList'));
+  assert.ok(html.includes('property="og:image"'));
+  assert.ok(html.includes('name="twitter:card"'));
   assert.ok(!html.includes('Switched to client rendering'));
   for (const image of html.matchAll(/<img\b[^>]*>/g))
     assert.match(image[0], /\balt=/);
@@ -102,8 +104,19 @@ for (const name of [
   'sitemap.xml',
   'favicon.svg',
   '.nojekyll',
+  'og.png',
 ])
   assert.ok((await stat(resolve('dist-pages', name))).isFile());
+assert.equal(m.pageInfo.Home.path, '');
+assert.equal(m.pageInfo.Today.path, 'dashboard/');
+const homeHtml = await readFile('dist-pages/index.html', 'utf8');
+assert.ok(homeHtml.includes('EducationalApplication'));
+assert.ok(!homeHtml.includes('LocalBusiness'));
+assert.ok(!homeHtml.includes('study-desk'));
+assert.ok(homeHtml.includes('href="/nathansrevisiongrove/dashboard/"'));
+assert.ok(homeHtml.includes('href="/nathansrevisiongrove/account/"'));
+const missingHtml = await readFile('dist-pages/404.html', 'utf8');
+assert.ok(missingHtml.includes('href="/nathansrevisiongrove/dashboard/"'));
 for (const name of await readdir('dist-pages/assets'))
   if (name.endsWith('.js'))
     assert.ok(

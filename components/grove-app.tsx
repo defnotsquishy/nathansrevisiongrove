@@ -3,7 +3,6 @@ import {
   useState,
   useEffect,
   useMemo,
-  useSyncExternalStore,
   lazy,
   Suspense,
   type CSSProperties,
@@ -79,7 +78,6 @@ import {
   SelectItem,
 } from '@/components/ui/select';
 import { Progress } from '@/components/ui/progress';
-import { Switch } from '@/components/ui/switch';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
 import {
@@ -143,25 +141,6 @@ const navigation = [
   { name: 'Sources', icon: HelpCircle },
   { name: 'Account', icon: CloudCheck },
 ] as const;
-const subscribeMotion = (callback: () => void) => {
-  const media = matchMedia('(prefers-reduced-motion: reduce)');
-  media.addEventListener('change', callback);
-  window.addEventListener('storage', callback);
-  return () => {
-    media.removeEventListener('change', callback);
-    window.removeEventListener('storage', callback);
-  };
-};
-const readMotion = () => {
-  try {
-    return (
-      localStorage.getItem('grove-quiet') === 'true' ||
-      matchMedia('(prefers-reduced-motion: reduce)').matches
-    );
-  } catch {
-    return matchMedia('(prefers-reduced-motion: reduce)').matches;
-  }
-};
 const formatDate = (
   date: string,
   options: Intl.DateTimeFormatOptions = { day: 'numeric', month: 'short' },
@@ -290,13 +269,7 @@ function App({
   const [edit, setEdit] = useState<Session | null>(null);
   const [active, setActive] = useState<Session | null>(null);
   const [help, setHelp] = useState(false);
-  const systemQuiet = useSyncExternalStore(
-    subscribeMotion,
-    readMotion,
-    () => true,
-  );
-  const [motionOverride, setMotionOverride] = useState<boolean | null>(null);
-  const quiet = motionOverride ?? systemQuiet;
+  const quiet = true;
   const [toast, setToast] = useState('');
   const [today, setToday] = useState(localDate());
   const [tint, setTint] = useState('#b8f78b');
@@ -465,8 +438,8 @@ function App({
                 </small>
               </div>
               <button
-                aria-label="Plan settings"
-                onClick={() => setPlanOpen(true)}
+                aria-label="Edit profile"
+                onClick={() => setView('Account')}
               >
                 <Settings2 size={17} />
               </button>
@@ -519,7 +492,16 @@ function App({
               <span className="streak-pill">
                 <Flame size={16} /> {streak(state, today)} day streak
               </span>
-              <span className="avatar">{state.settings.name.charAt(0)}</span>
+              <button
+                className="profile-shortcut"
+                onClick={() => setView('Account')}
+                aria-label="Open profile and account"
+              >
+                <span className="avatar" aria-hidden="true">
+                  {state.settings.name.charAt(0).toUpperCase()}
+                </span>
+                <span>Profile</span>
+              </button>
             </div>
           </header>
           <main className="main-content" id="main-content" tabIndex={-1}>
@@ -592,17 +574,17 @@ function App({
                             ? 'Change a value. See what happens. Then try explaining why.'
                             : view === 'Practice'
                               ? pageInfo.Practice.description
-                            : [
-                                  'Account',
-                                  'Admin',
-                                  'Privacy',
-                                  'Cookies',
-                                  'Credits',
-                                ].includes(view)
-                              ? pageInfo[view].description
-                              : view === 'Sources'
-                                ? 'The evidence and resource credits behind the tools.'
-                                : 'First Class Maths videos, questions and worked solutions.'}
+                              : [
+                                    'Account',
+                                    'Admin',
+                                    'Privacy',
+                                    'Cookies',
+                                    'Credits',
+                                  ].includes(view)
+                                ? pageInfo[view].description
+                                : view === 'Sources'
+                                  ? 'The evidence and resource credits behind the tools.'
+                                  : 'First Class Maths videos, questions and worked solutions.'}
                 </p>
               </div>
               {![
@@ -1073,21 +1055,7 @@ function App({
                 <Sprout size={14} />
                 Progress saves as you work.
               </span>
-              <label>
-                <Switch
-                  checked={quiet}
-                  onCheckedChange={(v) => {
-                    setMotionOverride(v);
-                    try {
-                      localStorage.setItem('grove-quiet', String(v));
-                    } catch {
-                      /* The current preference still works when storage is unavailable. */
-                    }
-                  }}
-                  aria-label="Reduce animation"
-                />
-                Calm motion
-              </label>
+              <span>Quiet revision mode</span>
             </footer>
             <div className="legal-footer">
               <p>© 2026 Nathan Yu · Nathan’s Revision Grove</p>
@@ -1111,6 +1079,10 @@ function App({
                   Cookies & storage
                 </a>
                 <a href={pageHref('Account', pagesBase || '/')}>Account</a>
+                <a href={pageHref('Terms', pagesBase || '/')}>
+                  Terms & conditions
+                </a>
+                <a href={pageHref('Home', pagesBase || '/')}>Home</a>
               </nav>
             </div>
           </main>
@@ -2054,7 +2026,9 @@ function TopicMap({
                 <strong>{t.title}</strong>
               </div>
               <fieldset className="rag-compact">
-                <legend className="sr-only">Rate confidence for {t.title}</legend>
+                <legend className="sr-only">
+                  Rate confidence for {t.title}
+                </legend>
                 {[
                   ['R', 1, 'Red'],
                   ['A', 2, 'Amber'],

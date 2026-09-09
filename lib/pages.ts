@@ -1,4 +1,22 @@
 export const pageInfo = {
+  Home: {
+    path: '',
+    title: 'Plan and practise GCSE maths',
+    description:
+      'Build a GCSE revision timetable, try maths questions and track red, amber and green topic confidence. Use Revision Grove free, with optional cloud accounts.',
+  },
+  Terms: {
+    path: 'terms/',
+    title: 'Terms and conditions',
+    description:
+      'Using Nathan’s Revision Grove, looking after your account and respecting the creators of linked maths resources.',
+  },
+  'Thank you': {
+    path: 'thank-you/',
+    title: 'Thank you for trying Revision Grove',
+    description:
+      'Choose your next revision step or share feedback with Nathan about Revision Grove.',
+  },
   Account: {
     path: 'account/',
     title: 'Your revision account',
@@ -30,7 +48,7 @@ export const pageInfo = {
       'Website copyright, First Class Maths attribution and open-source credits.',
   },
   Today: {
-    path: '',
+    path: 'dashboard/',
     title: 'Revision dashboard',
     description:
       'Plan your next GCSE revision session, track your effort and grow your revision tree.',

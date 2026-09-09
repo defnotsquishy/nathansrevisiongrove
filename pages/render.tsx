@@ -1,6 +1,7 @@
 import { renderToPipeableStream } from 'react-dom/server';
 import { PassThrough } from 'node:stream';
 import GroveApp from '../components/grove-app';
+import PublicSite, { isPublicView } from '../components/public-site';
 export { pageInfo } from '../lib/pages';
 import type { View } from '../lib/pages';
 
@@ -13,7 +14,11 @@ export function render(view: View, base: string): Promise<string> {
     });
     output.on('end', () => resolve(html));
     const stream = renderToPipeableStream(
-      <GroveApp initialView={view} pagesBase={base} />,
+      isPublicView(view) ? (
+        <PublicSite view={view} base={base} />
+      ) : (
+        <GroveApp initialView={view} pagesBase={base} />
+      ),
       {
         onAllReady() {
           stream.pipe(output);

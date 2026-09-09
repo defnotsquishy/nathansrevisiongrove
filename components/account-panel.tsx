@@ -14,7 +14,93 @@ import { readDevicePlan, exportBackup } from '@/lib/device-storage';
 import { pageHref } from '@/lib/pages';
 import type { AppState } from '@/lib/model';
 
-export default function AccountPanel({
+function ProfileEditor({
+  state,
+  ready,
+  save,
+}: {
+  state: AppState;
+  ready: boolean;
+  save: (state: AppState, message?: string) => Promise<boolean>;
+}) {
+  const [editedName, setDraft] = useState<string | null>(null);
+  const draft = editedName ?? state.settings.name;
+  const [busy, setBusy] = useState(false);
+  const [feedback, setFeedback] = useState('');
+  return (
+    <section className="panel account-panel profile-editor">
+      <h2>Your revision profile</h2>
+      <p>
+        Choose the name shown in your workspace. A nickname is fine. This saves
+        with your revision progress.
+      </p>
+      <form
+        noValidate
+        className="form-stack"
+        onSubmit={async (event) => {
+          event.preventDefault();
+          if (busy || !ready) return;
+          const next = draft.trim();
+          if (!next || next.length > 35) {
+            setFeedback('Enter a name between 1 and 35 characters.');
+            return;
+          }
+          setBusy(true);
+          setFeedback('');
+          try {
+            const saved = await save(
+              { ...state, settings: { ...state.settings, name: next } },
+              'Profile saved',
+            );
+            setFeedback(
+              saved
+                ? 'Profile saved.'
+                : 'Your profile could not be saved. Check your connection and try again.',
+            );
+          } catch {
+            setFeedback('Your profile could not be saved. Try again.');
+          } finally {
+            setBusy(false);
+          }
+        }}
+      >
+        <label htmlFor="revision-name">Revision name</label>
+        <Input
+          id="revision-name"
+          autoComplete="nickname"
+          maxLength={35}
+          value={draft}
+          onChange={(event) => setDraft(event.target.value)}
+          disabled={busy || !ready}
+        />
+        <button
+          className="button primary"
+          disabled={busy || !ready || draft.trim() === state.settings.name}
+        >
+          {busy ? 'Saving…' : 'Save profile'}
+        </button>
+        <output aria-live="polite">{feedback}</output>
+      </form>
+    </section>
+  );
+}
+
+export default function AccountPanel(props: {
+  base: string;
+  state: AppState;
+  ready: boolean;
+  save: (state: AppState, message?: string) => Promise<boolean>;
+}) {
+  const cloud = useCloud();
+  return (
+    <div className="profile-page">
+      <ProfileEditor key={cloud.user?.uid ?? 'guest'} {...props} />
+      <AccountControls {...props} />
+    </div>
+  );
+}
+
+function AccountControls({
   base,
   state,
   ready,

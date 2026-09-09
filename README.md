@@ -2,6 +2,8 @@
 
 [Open the app](https://defnotsquishy.github.io/nathansrevisiongrove/)
 
+The public homepage introduces the project with an interactive geometry preview, FAQ and development case study. Open `dashboard/` for the revision workspace or `account/` for sign-in. Only the homepage animates; study pages use quiet mode. Privacy, cookies, terms, credits and a project thank-you page are linked in the footer. The social share card is generated from original typography, without photographs or generated imagery.
+
 A GCSE revision timetable with 106 Higher Maths topics, an original quick-question practice desk, First Class Maths booklet links, saved RAG confidence checks, a focus timer, custom subjects, a growing 3D tree and an interactive maths lab.
 
 ## Your progress
@@ -31,8 +33,6 @@ The custom 404 is a genuine missing-page response; unknown URLs do not silently 
 The maths lab and 3D models load on demand. React and Three.js use separate cacheable bundles. CSS scans only components used by this app. Navigation works through real links. Models and graphs have accessible descriptions, controls have labels, motion respects system preferences and a Calm motion switch, and keyboard users have a skip link. The current UI uses SVG icons and canvas models rather than photographic images; meaningful visuals have text equivalents.
 
 ## Research and credits
-
-
 
 1. **What helps revision stick?** Retrieval practice and spaced practice inform the focus prompt and due-topic list. The 1/3/7-day confidence gaps are adjustable product heuristics, not a scientifically optimal timetable. [The Learning Scientists](https://www.learningscientists.org/faq).
 2. **What makes a timetable manageable?** Realistic sessions and regular breaks. Default sessions last 25 minutes, generated plans leave five-minute gaps, and the timer offers a five-minute break. [UCL revision guidance](https://www.ucl.ac.uk/study/current-students/exams-and-assessments/assessment-success-guide/effective-revision-and-assessment-planning).

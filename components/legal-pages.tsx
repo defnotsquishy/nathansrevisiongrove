@@ -43,6 +43,10 @@ export function Credits() {
       </p>
       <h2>Software credits</h2>
       <p>
+        The homepage walkthrough uses Remotion. Interactive geometry uses
+        Three.js. The social share card is an original typeset graphic.
+      </p>
+      <p>
         The app uses React, Three.js, Firebase, Base UI, shadcn/ui, Lucide,
         TanStack Query and other open-source libraries under their own licences.
         Bundled third-party licence information remains in the source
@@ -63,10 +67,10 @@ export function PrivacyPolicy() {
       <h2>Your revision is yours</h2>
       <p>
         Nathan’s Revision Grove is operated by Nathan Yu. We do not collect
-        advertising or analytics data, and we do not sell personal data. You
-        can use the timetable without creating an account. If you choose an
-        account, the app stores only the account and revision information needed
-        to provide sign-in and cloud progress.
+        advertising or analytics data, and we do not sell personal data. You can
+        use the timetable without creating an account. If you choose an account,
+        the app stores only the account and revision information needed to
+        provide sign-in and cloud progress.
       </p>
       <p className="account-notice">
         {cloudConfigured
@@ -216,8 +220,11 @@ export function CookiePolicy() {
               <td>Until cleared from site data</td>
             </tr>
             <tr>
-              <td>grove-quiet</td>
-              <td>Your chosen motion setting</td>
+              <td>grove-quiet (from earlier versions)</td>
+              <td>
+                Old motion preference, no longer used. Revision pages now always
+                use quiet mode.
+              </td>
               <td>Until cleared from site data</td>
             </tr>
             <tr>
