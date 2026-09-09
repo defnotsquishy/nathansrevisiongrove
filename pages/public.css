@@ -638,12 +638,6 @@
 .public-document .policy-page li {
   font-size: 16px;
 }
-.workspace-loading {
-  min-height: 400px;
-  display: grid;
-  place-items: center;
-  color: #f2a368;
-}
 .public-hero h1 {
   animation: home-enter 0.5s ease-out both;
 }
